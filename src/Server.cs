@@ -14,11 +14,20 @@ var buffer = new byte[1024];
 socket.Receive(buffer);
 
 var lines = ASCIIEncoding.ASCII.GetString(buffer).Split("\r\n");
+string requestLine = lines[0];
+string url = requestLine.Split(' ')[1];
 
-if (lines.Any() && lines[0].Split(" ")[1] != "/")
+
+if (url == "/")
+{
+    socket.Send(Encoding.UTF8.GetBytes("HTTP/1.1 200 OK\r\n\r\n"));   
+} 
+else if(url.StartsWith("/echo/"))
+{
+    string echoWord = url.Substring(6);
+    socket.Send(Encoding.UTF8.GetBytes($"HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: {echoWord.Length}\r\n\r\n{echoWord}"));
+} 
+else
 {
     socket.Send(Encoding.UTF8.GetBytes("HTTP/1.1 404 Not Found\r\n\r\n"));
-} else
-{
-    socket.Send(Encoding.UTF8.GetBytes("HTTP/1.1 200 OK\r\n\r\n"));
 }
